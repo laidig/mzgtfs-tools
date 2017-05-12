@@ -7,7 +7,9 @@ import mzgtfs.feed
 import mzgtfs.util
 
 
-def add_feed_id(gtfs_feed, gtfs_file, feed_id = None):
+def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False):
+    files = ["feed_info.txt"]
+
     if len(gtfs_feed.agencies()) > 1:
         raise ValueError('cannot process feed with more than one agency') 
 
@@ -23,6 +25,18 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None):
     else:
         feed_lang = 'en'
 
+    for f in files:
+        if os.path.exists(f):
+            os.remove(f)
+
+    if new_agency_id_bool:
+        gtfs_feed.agency(agency_id).set('agency_id', feed_id)
+        agency_id = feed_id
+        files.append('agency.txt')
+        gtfs_feed.write('agency.txt', gtfs_feed.agencies())
+    else:
+        pass
+
     if 'feed_info' not in gtfs_feed.by_id:
         gtfs_feed.by_id['feed_info'] = {}
         cls = gtfs_feed.FACTORIES['feed_info']
@@ -35,36 +49,28 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None):
         gtfs_feed.by_id['feed_info']['a'] = info
 
 
-
-    files = ["feed_info.txt"]
-    for f in files:
-        if os.path.exists(f):
-            os.remove(f)
-
     gtfs_feed.write('feed_info.txt', gtfs_feed.feed_infos())
     gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
+    shutil.move('output.zip', gtfs_file)
     
 
 def main(argv):
     if len(argv) < 2:
-        print "usage: add_feed_id.py gtfs_file <optional replacement feed_id>"
+        print "usage: add_feed_id.py gtfs_file <optional replacement feed_id> <boolean to replace agency_id with new feed_id>"
         sys.exit(0)
 
-    if len(argv) > 2:
-        feed_id = argv[2]
-    else:
-        feed_id = None
+    feed_id = argv[2] if len(argv) > 2 else None
+    new_agency_id_bool = argv[3] if len(argv) > 3 else False
 
     gtfs_file = argv[1]
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
     
     try:
-        add_feed_id(gtfs_feed, gtfs_file, feed_id)
+        add_feed_id(gtfs_feed, gtfs_file, feed_id, new_agency_id_bool)
+
     except Exception as e:
         print(repr(e))
 
-    shutil.move('output.zip', gtfs_file)
-    os.remove('feed_info.txt')
 
 if __name__ == "__main__":
    main(sys.argv)

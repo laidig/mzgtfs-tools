@@ -26,15 +26,12 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     else:
         feed_lang = 'en'
 
-    util.delete_temp_files(files)
-
     if new_agency_id_bool:
         gtfs_feed.agency(agency_id).set('agency_id', feed_id)
         agency_id = feed_id
 
         files.append('agency.txt')
         files.append('routes.txt')
-        util.delete_temp_files(files)
 
         gtfs_feed.write('agency.txt', gtfs_feed.agencies())
         
@@ -59,6 +56,7 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     gtfs_feed.write('feed_info.txt', gtfs_feed.feed_infos())
     gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
     shutil.move('output.zip', gtfs_file)
+    util.delete_temp_files(files)
     
 
 def main(argv):

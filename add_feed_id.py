@@ -1,10 +1,11 @@
 #!/usr/bin/python
 """Add a feed_info with feed_id to the gtfs
-"""
+usage: add_feed_id.py gtfs_file <optional replacement feed_id> <boolean to replace agency_id with new feed_id>"""
 
 import sys, os, shutil
 import mzgtfs.feed
 import mzgtfs.util
+import util
 
 
 def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False):
@@ -25,15 +26,21 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     else:
         feed_lang = 'en'
 
-    for f in files:
-        if os.path.exists(f):
-            os.remove(f)
+    util.delete_temp_files(files)
 
     if new_agency_id_bool:
         gtfs_feed.agency(agency_id).set('agency_id', feed_id)
         agency_id = feed_id
+
         files.append('agency.txt')
+        files.append('routes.txt')
+        util.delete_temp_files(files)
+
         gtfs_feed.write('agency.txt', gtfs_feed.agencies())
+        
+        for r in gtfs_feed.routes():
+            r.set('agency_id', feed_id)
+        gtfs_feed.write('routes.txt', gtfs_feed.routes())
     else:
         pass
 
@@ -60,7 +67,7 @@ def main(argv):
         sys.exit(0)
 
     feed_id = argv[2] if len(argv) > 2 else None
-    new_agency_id_bool = argv[3] if len(argv) > 3 else False
+    new_agency_id_bool = argv[3] if argv[3] else False
 
     gtfs_file = argv[1]
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)

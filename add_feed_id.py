@@ -10,9 +10,10 @@ import util
 
 def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False):
     files = ["feed_info.txt"]
+    util.delete_temp_files(files)
 
-    if len(gtfs_feed.agencies()) > 1:
-        raise ValueError('cannot process feed with more than one agency') 
+    if len(gtfs_feed.agencies()) > 1 and new_agency_id_bool is True:
+        raise ValueError('cannot replace agency_id when there is more than one agency')
 
     agency_id = gtfs_feed.agencies()[0].id()
     url = gtfs_feed.agency(agency_id).get('agency_url')
@@ -65,7 +66,7 @@ def main(argv):
         sys.exit(0)
 
     feed_id = argv[2] if len(argv) > 2 else None
-    new_agency_id_bool = argv[3] if argv[3] else False
+    new_agency_id_bool = argv[3] if len(argv) >3 else False
 
     gtfs_file = argv[1]
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)

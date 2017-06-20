@@ -60,15 +60,8 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     util.delete_temp_files(files)
     
 
-def main(argv):
-    if len(argv) < 2:
-        print "usage: add_feed_id.py gtfs_file <optional replacement feed_id> <boolean to replace agency_id with new feed_id>"
-        sys.exit(0)
+def main(gtfs_file, feed_id, new_agency_id_bool=False):
 
-    feed_id = argv[2] if len(argv) > 2 else None
-    new_agency_id_bool = argv[3] if len(argv) >3 else False
-
-    gtfs_file = argv[1]
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
     
     try:
@@ -79,4 +72,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
-   main(sys.argv)
+   import plac
+   plac.call(main)

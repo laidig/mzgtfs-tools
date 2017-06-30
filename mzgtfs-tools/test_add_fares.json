@@ -1,0 +1,13 @@
+        { "1" : {
+            "fare_attributes" : {
+                "price" : "0.95",
+                "currency_type" : "EUR",
+                "payment_method" : 0,
+                "transfers" : 0
+            }, 
+            "fare_rules" : {
+                "route_regex" : ".",
+                "origin_id" : "1",
+                "desination_id" : "2"
+            }
+        }}

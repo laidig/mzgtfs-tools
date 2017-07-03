@@ -8,6 +8,14 @@ import mzgtfs.util
 import util
 
 
+def str_to_bool(s):
+    if s == 'True':
+         return True
+    elif s == 'False':
+         return False
+    else:
+         raise ValueError # evil ValueError that doesn't tell you what the wrong value was
+
 def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False):
     files = ["feed_info.txt"]
     util.delete_temp_files(files)
@@ -27,7 +35,7 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     else:
         feed_lang = 'en'
 
-    if new_agency_id_bool:
+    if str_to_bool(new_agency_id_bool):
         gtfs_feed.agency(agency_id).set('agency_id', feed_id)
         agency_id = feed_id
 
@@ -60,8 +68,15 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
     util.delete_temp_files(files)
     
 
-def main(gtfs_file, feed_id, new_agency_id_bool=False):
+def main(argv):
+    if len(argv) < 2:
+        print "usage: add_feed_id.py gtfs_file <optional replacement feed_id> <boolean to replace agency_id with new feed_id>"
+        sys.exit(0)
 
+    feed_id = argv[2] if len(argv) > 2 else None
+    new_agency_id_bool = argv[3] if len(argv) >3 else False
+
+    gtfs_file = argv[1]
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
     
     try:
@@ -72,5 +87,4 @@ def main(gtfs_file, feed_id, new_agency_id_bool=False):
 
 
 if __name__ == "__main__":
-   import plac
-   plac.call(main)
+   main(sys.argv)

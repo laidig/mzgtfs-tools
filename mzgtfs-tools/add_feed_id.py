@@ -22,7 +22,7 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
 
     print "adding feed_id " + feed_id +" to " + gtfs_file
         
-    if lang: 
+    if lang:
         feed_lang = lang
     else:
         feed_lang = 'en'
@@ -35,7 +35,7 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
         files.append('routes.txt')
 
         gtfs_feed.write('agency.txt', gtfs_feed.agencies())
-        
+
         for r in gtfs_feed.routes():
             r.set('agency_id', feed_id)
         gtfs_feed.write('routes.txt', gtfs_feed.routes())
@@ -47,29 +47,31 @@ def add_feed_id(gtfs_feed, gtfs_file, feed_id = None, new_agency_id_bool = False
         cls = gtfs_feed.FACTORIES['feed_info']
         info = cls.from_row({
             'feed_publisher_name' : agency_id,
-            'feed_publisher_url' : url ,
+            'feed_publisher_url' : url,
             'feed_lang' : feed_lang,
             'feed_id' : feed_id
             })
         gtfs_feed.by_id['feed_info']['a'] = info
+
+    else:
+        gtfs_feed.feed_infos.set('feed_id', feed_id)
 
 
     gtfs_feed.write('feed_info.txt', gtfs_feed.feed_infos())
     gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
     shutil.move('output.zip', gtfs_file)
     util.delete_temp_files(files)
-    
+
 
 def main(gtfs_file, feed_id, new_agency_id_bool=False):
 
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
-    
+
     try:
         add_feed_id(gtfs_feed, gtfs_file, feed_id, new_agency_id_bool)
 
     except Exception as e:
-        print(repr(e))
-
+        print repr(e)
 
 if __name__ == "__main__":
    import plac

@@ -23,7 +23,7 @@ Takes in a JSON file in the following format:
     }
 }
 
-Setting fares by origin / destination is not explicitly supported or tested at the moment.abs
+Setting fares by origin / destination is not explicitly supported or tested at the moment.
 
 refer to GTFS spec fare_attributes.txt and fare_rules.txt for more information
 """
@@ -32,7 +32,6 @@ import json
 import pprint
 import shutil
 import mzgtfs.feed
-import plac
 import util
 
 def add_fare_id(feed, fare_id, rules_attributes):
@@ -42,6 +41,7 @@ def add_fare_id(feed, fare_id, rules_attributes):
     routes = []
     attributes = rules_attributes['fare_attributes']
     rules = rules_attributes['fare_rules']
+    routes_with_fares = set()
 
     if 'route_id' in rules:
         routes.append(rules['route_id'])
@@ -53,6 +53,7 @@ def add_fare_id(feed, fare_id, rules_attributes):
         routes.extend(route_ids)
 
     elif 'route_regex' in rules:
+        print " regex " + rules['route_regex']
         regex = rules['route_regex']
         for r in feed.routes():
             if re.match(regex, r.id()) is not None:
@@ -60,14 +61,23 @@ def add_fare_id(feed, fare_id, rules_attributes):
 
     add_attribute(feed, fare_id, attributes)
 
-    #remove route information from rules.
+    #remove route information from the rules dict.
     #forgive me for the non-pythonic design
     for k in rules.keys():
         if "route" in k:
             del rules[k]
 
+    print repr(routes)
+
     for route in routes:
+        if route in routes_with_fares:
+            print route + "already has a fare, skipping"
+            continue
+
         add_rule_to_route(feed, fare_id, route, rules)
+        routes_with_fares.add(route)
+
+    print repr(routes_with_fares)
 
     
 def add_attribute(feed, fare_id, attributes):
@@ -90,11 +100,18 @@ def add_rule_to_route(feed, fare_id, route_id, rules=None):
     add fare_id and an optional dict of rules to route_id
     additional rules (origin_id, desination_id, contains_id) are not supported/tested yet,
     """
+
+    infostring = "adding fare " + fare_id + " to " + route_id
+
     if not rules:
         rules = {}
+    else:
+        infostring += str(repr(rules))
 
     rules['fare_id'] = fare_id
     rules['route_id'] = route_id
+
+    print infostring
 
     if 'fare_rules' not in feed.by_id:
         feed.by_id['fare_rules'] = {}
@@ -105,11 +122,12 @@ def add_rule_to_route(feed, fare_id, route_id, rules=None):
 
 def main(gtfs_file, input_json_file):
     """ load gtfs_file and instructions from JSON"""
-    gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
-    gtfs_feed.preload()
 
     with open(input_json_file) as jsonfile:
         input_json = json.load(jsonfile)
+
+    gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
+    gtfs_feed.preload()
 
     for fare_id, rules_attributes in input_json.iteritems():
         add_fare_id(gtfs_feed, fare_id, rules_attributes)
@@ -118,11 +136,11 @@ def main(gtfs_file, input_json_file):
     gtfs_feed.write('fare_attributes.txt', gtfs_feed.fares())
     gtfs_feed.write('fare_rules.txt', gtfs_feed.fare_rules())
 
-    gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
-    shutil.move('output.zip', gtfs_file)
+    # gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
+    # shutil.move('output.zip', gtfs_file)
 
     util.delete_temp_files(files)
 
 if __name__ == "__main__":
-   import plac
-   plac.call(main)
+    import plac
+    plac.call(main)

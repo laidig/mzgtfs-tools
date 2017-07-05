@@ -19,12 +19,11 @@ Takes in a JSON file in the following format:
             "route_id" : ..., // or
             "route_ids" : [], // or
             "route_regex" : '.' // '.' is the wildcard
-            "origin_id" : (optional),
-            "desination_id" : (optional),
-            "contains_id": (optional)
         }
     }
 }
+
+Setting fares by origin / destination is not explicitly supported or tested at the moment.abs
 
 refer to GTFS spec fare_attributes.txt and fare_rules.txt for more information
 """
@@ -86,12 +85,13 @@ def add_attribute(feed, fare_id, attributes):
     fare_attribute = factory.from_row(attributes)
     feed.by_id['fare_attributes'][fare_id] = fare_attribute
     
-def add_rule_to_route(feed, fare_id, route_id, rules):
+def add_rule_to_route(feed, fare_id, route_id, rules=None):
     """
     add fare_id and an optional dict of rules to route_id
-    rules can be: origin_id, desination_id, contains_id,
-    or simply {} if not needed
+    additional rules (origin_id, desination_id, contains_id) are not supported/tested yet,
     """
+    if not rules:
+        rules = {}
 
     rules['fare_id'] = fare_id
     rules['route_id'] = route_id
@@ -117,6 +117,9 @@ def main(gtfs_file, input_json_file):
     files = ['fare_attributes.txt', 'fare_rules.txt']
     gtfs_feed.write('fare_attributes.txt', gtfs_feed.fares())
     gtfs_feed.write('fare_rules.txt', gtfs_feed.fare_rules())
+
+    gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
+    shutil.move('output.zip', gtfs_file)
 
     util.delete_temp_files(files)
 

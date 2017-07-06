@@ -22,6 +22,8 @@ Takes in a JSON file in the following format:
         }
     }
 }
+Fare IDs are processed in order, if multiple fares are added, they are added in order of precedence.
+For example, special fares with regexes or lists of routes to be processed should go before the wildcard.
 
 Setting fares by origin / destination is not explicitly supported or tested at the moment.
 
@@ -29,10 +31,11 @@ refer to GTFS spec fare_attributes.txt and fare_rules.txt for more information
 """
 import re
 import json
-import pprint
 import shutil
 import mzgtfs.feed
 import util
+
+ROUTES_WITH_FARES = set()
 
 def add_fare_id(feed, fare_id, rules_attributes):
     """ take in fare_id, rules, and attributes
@@ -41,7 +44,6 @@ def add_fare_id(feed, fare_id, rules_attributes):
     routes = []
     attributes = rules_attributes['fare_attributes']
     rules = rules_attributes['fare_rules']
-    routes_with_fares = set()
 
     if 'route_id' in rules:
         routes.append(rules['route_id'])
@@ -70,23 +72,20 @@ def add_fare_id(feed, fare_id, rules_attributes):
     print repr(routes)
 
     for route in routes:
-        if route in routes_with_fares:
-            print route + "already has a fare, skipping"
+        if route in ROUTES_WITH_FARES:
+            print route + " already has a fare, skipping"
             continue
 
         add_rule_to_route(feed, fare_id, route, rules)
-        routes_with_fares.add(route)
+        ROUTES_WITH_FARES.add(route)
 
-    print repr(routes_with_fares)
-
-    
 def add_attribute(feed, fare_id, attributes):
     """ add a fare_attribute to fare_id
     Per the spec, standard fields to go into attribute are:
             "price" : "2.75",
             "currency_type" : "USD",
-            "payment_method" : 0|1,
-            "transfers" : 0|1|2 (optional),
+            "payment_method" : 0|1, (on board, off-board)
+            "transfers" : 0|1|2 (optional, unlimited if null and duration is set),
             "transfer_duration" : (optional, seconds)
     """
     feed.by_id['fare_attributes'] = {}
@@ -94,11 +93,11 @@ def add_attribute(feed, fare_id, attributes):
     attributes['fare_id'] = fare_id
     fare_attribute = factory.from_row(attributes)
     feed.by_id['fare_attributes'][fare_id] = fare_attribute
-    
+
 def add_rule_to_route(feed, fare_id, route_id, rules=None):
     """
     add fare_id and an optional dict of rules to route_id
-    additional rules (origin_id, desination_id, contains_id) are not supported/tested yet,
+    additional rules (origin_id, desination_id, contains_id) are not supported/tested.
     """
 
     infostring = "adding fare " + fare_id + " to " + route_id
@@ -136,8 +135,8 @@ def main(gtfs_file, input_json_file):
     gtfs_feed.write('fare_attributes.txt', gtfs_feed.fares())
     gtfs_feed.write('fare_rules.txt', gtfs_feed.fare_rules())
 
-    # gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
-    # shutil.move('output.zip', gtfs_file)
+    gtfs_feed.make_zip('output.zip', files=files, clone=gtfs_file)
+    shutil.move('output.zip', gtfs_file)
 
     util.delete_temp_files(files)
 

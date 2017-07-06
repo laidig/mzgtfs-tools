@@ -57,7 +57,7 @@ def add_fare_id(feed, fare_id, rules_attributes):
     elif 'route_regex' in rules:
         print " regex " + rules['route_regex']
         regex = rules['route_regex']
-        for r in feed.routes():
+        for r in feed.iterread('routes'):
             if re.match(regex, r.id()) is not None:
                 routes.append(r.id())
 
@@ -126,7 +126,6 @@ def main(gtfs_file, input_json_file):
         input_json = json.load(jsonfile)
 
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
-    gtfs_feed.preload()
 
     for fare_id, rules_attributes in input_json.iteritems():
         add_fare_id(gtfs_feed, fare_id, rules_attributes)

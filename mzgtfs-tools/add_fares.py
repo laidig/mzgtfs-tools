@@ -55,7 +55,7 @@ def add_fare_id(feed, fare_id, rules_attributes):
         routes.extend(route_ids)
 
     elif 'route_regex' in rules:
-        print " regex " + rules['route_regex']
+        print " processing regex " + rules['route_regex']
         regex = rules['route_regex']
         for r in feed.iterread('routes'):
             if re.match(regex, r.id()) is not None:
@@ -68,8 +68,6 @@ def add_fare_id(feed, fare_id, rules_attributes):
     for k in rules.keys():
         if "route" in k:
             del rules[k]
-
-    print repr(routes)
 
     for route in routes:
         if route in ROUTES_WITH_FARES:
@@ -88,7 +86,10 @@ def add_attribute(feed, fare_id, attributes):
             "transfers" : 0|1|2 (optional, unlimited if null and duration is set),
             "transfer_duration" : (optional, seconds)
     """
-    feed.by_id['fare_attributes'] = {}
+    if 'fare_attributes' not in feed.by_id:
+        feed.by_id['fare_attributes'] = {}
+
+    print "adding fare " + fare_id + " to feed"
     factory = feed.FACTORIES['fare_attributes']
     attributes['fare_id'] = fare_id
     fare_attribute = factory.from_row(attributes)

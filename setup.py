@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='mzgtfs-tools',
-      version='0.1',
+      version='0.1.2',
       description='tools using mapzen-gtfs library',
       author='Tony Laidig',
       author_email='laidig@gmail.com',

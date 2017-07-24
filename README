@@ -1,5 +1,5 @@
 # mzgtfs-tools
-Python scripts using the mapzen-gtfs lib
+Python scripts for modifying GTFS data using the mapzen-gtfs lib. 
 
 ## Included Tools:
 
@@ -7,9 +7,13 @@ Python scripts using the mapzen-gtfs lib
 | add_fares.py | add fares to a GTFS by route ID or regex pattern of route ids | 
 | add_feed_id.py | add a feed_id (for OpenTripPlanner) |
 | headsign_fixer.py | replace the headsign of trips for all instances of a shape_id | 
+| make_all_accessible.py | make trips and routes accessible by default | 
 | prepend_agency_id.py | Prepend agency_id to stops/routes/trips (e.g. agency_1) | 
 | route_splitter.py | Split one route into multiple routes |
 | transfer_humanizer.py | Build a human readable transfer file | 
+
+## Requirements:
+ 1. Python 2.7 (mzgtfs does not support Python 3)
 
 ## Installation:
 Install the mapzen-gtfs dependency

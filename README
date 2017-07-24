@@ -16,7 +16,7 @@ Python scripts for modifying GTFS data using the mapzen-gtfs lib.
  1. Python 2.7 (mzgtfs does not support Python 3)
 
 ## Installation:
-Install the mapzen-gtfs dependency
+These tools are available via as a Python package in [pip](https://pypi.python.org/pypi/mzgtfs-tools). Some depend on a fork of mapzen-gtfs, to install it:
 
     pip install https://github.com/BusTechnology/mapzen-gtfs/zipball/master
 

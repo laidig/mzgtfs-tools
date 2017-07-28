@@ -4,6 +4,7 @@ Python scripts for modifying GTFS data using the mapzen-gtfs lib.
 ## Included Tools:
 
 | Tool | Purpose |
+| add_accessible.py | add accessible stops based upon a JSON array |
 | add_fares.py | add fares to a GTFS by route ID or regex pattern of route ids | 
 | add_feed_id.py | add a feed_id (for OpenTripPlanner) |
 | headsign_fixer.py | replace the headsign of trips for all instances of a shape_id | 

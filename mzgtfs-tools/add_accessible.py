@@ -18,12 +18,16 @@ def main(gtfs_file, input_json_file):
     gtfs_feed = mzgtfs.feed.Feed(filename=gtfs_file)
     feed_stops = gtfs_feed.stops()
 
-    with open(input_json_file) as jsonfile:
+    with open(input_json_file,'rb') as jsonfile:
         accessible_stops = json.load(jsonfile)
+        accessible_stop_count = len(accessible_stops)
+
+    added_accessible_stop_count = 0
 
     for stop in feed_stops:
         if stop.id() in accessible_stops:
             stop.set('wheelchair_boarding', '1')
+            added_accessible_stop_count += 1
     
     make_accessible_trips(gtfs_feed)
 
@@ -31,6 +35,8 @@ def main(gtfs_file, input_json_file):
 
     cols = ['stop_id','stop_lat','stop_lon','stop_name','wheelchair_boarding']
     gtfs_feed.write('stops.txt', gtfs_feed.stops(), columns=cols)
+
+    print "added accessibility to {} stops from list of {}".format(added_accessible_stop_count, accessible_stop_count)
 
     cols = ['route_id','trip_id','service_id','direction_id','trip_headsign','shape_id','wheelchair_accessible']
     gtfs_feed.write('trips.txt', gtfs_feed.trips(), columns=cols)

@@ -11,6 +11,7 @@ Some things that mapzen-gtfs/Python does over OneBusAway-gtfs/Java:
 ## Included Tools:
 
 | Tool | Purpose |
+|------|---------|
 | add_accessible.py | add accessible stops based upon a JSON array |
 | add_fares.py | add fares to a GTFS by route ID or regex pattern of route ids | 
 | add_feed_id.py | add a feed_id (for OpenTripPlanner) |
